@@ -5,32 +5,26 @@ angular note to refresh in mind angular features and quircks
 
 
 ### 1- Target Directive :
-	* builtin directives:
+**Builtin directives:**
+ - [ngClass] = "expression ".
+ - [ngStyle] = " expression".
+ - ngIf.
+ - ngSwitch ngSwitchCase ngSwitchDefault.
 
-	 - [ngClass] = "expression ".
    
-	 - [ngStyle] = " expression".
-   
-	 - ngIf.
-   
-	 - ngSwitch ngSwitchCase ngSwitchDefault.
-   
-	 - ngTemplateOutlet.
+ngTemplateOutlet.
    
 ### 2- Target Property :
-	* properties:
+**Properties:**
   
-	 - [property] standard binding.
-    
-   - [attr.name] attribute binding.
-    
-   - [class.name] This is the special class property binding.
-    
-   - [style.name] This is the special style property binding.
- 
 
+ - [property] standard binding.
+ - [attr.name] attribute binding.
+ - [class.name] This is the special class property binding.
+ - [style.name] This is the special style property binding.
+ 
 Class binding :
-   * differnet class bindings :
+   **differnet class bindings :**
    
    - [class] = "exp"  -> replace all classes.
 
@@ -39,7 +33,7 @@ Class binding :
    - [ngClass] = "exp" -> expr in [string, Arry , Map (key=String one more class, value = boolean).
 
 
-Style binding :
+**Style binding :**
    * differnet Style bindings :
    
    - [style.myStyle] = "expr"  exemple : [style.fontSize]="fontSizeWithUnits",    where :  fontSizeWithUnits: string = "30px".
@@ -50,50 +44,46 @@ Style binding :
    
 ### Built-in directives:
 
-If satetement:
+**If satetement:**
 
-html ```
+    <div *ngIf="expr"></div>
 
-<div *ngIf="expr"></div>
-
-```
 
 #### Switch satetement:
 
-html```
+    <div [ngSwitch]="expr">                      ->  swich
+    	<span *ngSwitchCase="expr"></span>       ->  case
+    	 <span *ngSwitchDefault></span>	         ->  default
+    </div>
 
-<div [ngSwitch]="expr">                          ->  swich
-	<span *ngSwitchCase="expr"></span>       ->  case
-	 <span *ngSwitchDefault></span>	         ->  default
-</div>
-
-```
 ### For Loop:
 
-html ```
-<div *ngFor="#item of expr"></div>
-```
+
+    <div *ngFor="#item of expr"></div>
+
 template Variables of ngFor :
-		last (boolean)
-		first (boolean)
-		index (number)
-		odd (boolean)
-		even (boolean)
-                 trackBy => syntax TrackBy:keyFunction where keyFunction has the following shape => function (key, object)
+		
 
-###Template outlet:
+ - last (boolean)
+ - first (boolean)
+ - index (number)
+ - odd (boolean)
+ - even (boolean)
+ - trackBy => syntax TrackBy:keyFunction where keyFunction has the
+   following shape => function (key, object)
 
-html```
+### Template outlet :
+
+
 	<ng-template #titleTemplate>
 		<h4 class="p-2 bg-success text-white">Repeated Content</h4>
 	</ng-template>
 
 	<ng-template [ngTemplateOutlet]="titleTemplate"></ng-template>
-```
 
-Exemple using ContextData:
 
-html```
+**Exemple using ContextData :**
+
 	<ng-template #titleTemplate let-text="title">
 		<h4 class="p-2 bg-success text-white">{{text}}</h4>
 	</ng-template>
@@ -105,13 +95,9 @@ html```
 	</div>
 
 	<ng-template [ngTemplateOutlet]="titleTemplate" [ngTemplateOutletContext]="{title: 'Footer'}"></ng-template>
-```
-Seen before:
- ngClass and ngStyle
 
-
-
+**Seen before:**
+ **ngClass** and **ngStyle**
 
 Note : a component's template can't access the globale namespace it only can access the component's context
-Exemple Template can't use Math.floor as Math is only acessible in globale context (or namespace) 
-
+Exemple Template can't use Math.floor as Math is only acessible in globale context (or namespace)
