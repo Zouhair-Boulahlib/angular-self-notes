@@ -227,4 +227,99 @@ import { ReactiveFormsModule, FormsModule } from "@angular/forms";
 export class AppModule {}
 ```
 
+#### Customize basic element of a Form Model
+*usefull imports :*
+
+```javascript
+import { FormControl, FormGroup, Validators } from "@angular/forms";
+```
+###### Form Control :
+
+```javascript
+export class ProductFormControl extends FormControl {
+	label: string;
+	modelProperty: string;
+	constructor(label:string, property:string, value: any, validator: any) {
+		super(value, validator);
+		this.label = label;
+		this.modelProperty = property;
+	}
+}
+```
+###### Form Group :
+
+```javascript
+export class ProductFormGroup extends FormGroup {
+	constructor() {
+	super({
+		name: new ProductFormControl("Name", "name", "", Validators.required),
+
+		category: new ProductFormControl("Category", "category", "",
+			Validators.compose([Validators.required,
+			Validators.pattern("^[A-Za-z ]+$"),
+			Validators.minLength(3),
+			Validators.maxLength(10)])),
+			
+		price: new ProductFormControl("Price", "price", "",
+			Validators.compose([Validators.required,
+			Validators.pattern("^[0-9\.]+$")]))
+	});
+		}
+		get productControls(): ProductFormControl[] {
+			return Object.keys(this.controls)
+			.map(k => this.controls[k] as ProductFormControl);
+		}
+}
+```
+assuming that a component has the following property :
+
+```javascript
+form: ProductFormGroup = new ProductFormGroup();
+```
+
+it should be accessible throw the template using : 
+
+```html
+<form class="m-2" novalidate [formGroup]="form" (ngSubmit)="submitForm(form)">
+```
+
+where submitForm(form) is as : 
+```javascript
+submitForm(form: NgForm)
+```
+###### Creating Custom Form Validators :
+
+*Exemple :*
+```javascript
+export class LimitValidator {
+	static Limit(limit:number) {
+		return (control:FormControl) : {[key: string]: any} => {
+			let val = Number(control.value);
+			if (val != NaN && val > limit) {
+				return {"limit": {"limit": limit, "actualValue": val}};
+			} else {
+				return null;
+			}
+		}
+	}
+}
+```
+
+*Applying a Custom Validator :*
+
+```javascript
+price: new ProductFormControl("Price", "price", "",
+	Validators.compose([
+		Validators.required,
+		LimitValidator.Limit(100),
+		Validators.pattern("^[0-9\.]+$")
+	])
+);
+```
+
+*The errors property of a FormControl :*
+
+```javascript
+this.errors['limit'].limit
+```
 
