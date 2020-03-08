@@ -322,4 +322,65 @@ price: new ProductFormControl("Price", "price", "",
 ```javascript
 this.errors['limit'].limit
 ```
+### Directives :
+
+TS code :
+
+```javascript
+@Directive({
+    selector: "[demo-attr]"
+})
+export class PaAttrDirective {
+    constructor(private element: ElementRef) {
+		this.element.nativeElement.classList.add("green-text")
+	}
+}
+```
+
+use in Template :
+
+```html
+<div demo-attr> </div>
+```
+**demo-attr**  :  the selector of the directive.
+**div** : hosst element in  (note that in TS file is provided as ElementRef object).
+
+
+| Name | Description |
+| ------------ | ------------ |
+| ngOnInit | This method is called after Angular has set the initial value for all the input properties that the directive has declared. |
+| ngOnChanges | This method is called when the value of an input property has changed and also just before the ngOnInit method is called.|
+| ngDoCheck | This method is called when Angular runs its change detection process so that directives have an opportunity to update any state that isn’t directly associated with an input property. |
+|ngAfterContentInit | This method is called when the directive’s content has been initialized|
+|ngAfterContentChecked | This method is called after the directive’s content has been inspected as part of the change detection process.|
+|ngOnDestroy | This method is called immediately before Angular destroys a directive.|
+
+
+
+Directives support both input bound properties ( use of @Input() decorators) and custom event (use of @Output() decorators).
+
+while angular support many plateforms is recommanded to avoid relaying on the constructor to get the ElementRef object, a better approache is to use :
+
+@HostBinding to map the host-element's attributes (class, id, textContent) to a bounded property (property decorated by @Input decorator)
+
+```javascript
+@Input("pa-attr")
+@HostBinding("class")
+ bgClass: string;
+```
+also you can use @HostListener to listen to the host event and  exemple :
+
+```javascript
+ @Output("pa-category")
+    click = new EventEmitter<string>();
+
+  @HostListener("click")
+    triggerCustomEvent() {
+        if (this.product != null) {
+            this.click.emit(this.product.category);
+        }
+    }
+```
+using that technique is no longer needed to use the constructor to get the host element's reference wiches a plateform independent approache.
+
 
