@@ -383,4 +383,127 @@ also you can use @HostListener to listen to the host event and  exemple :
 ```
 using that technique is no longer needed to use the constructor to get the host element's reference wiches a plateform independent approache.
 
+##### the ngOnChanges() anglar lifecycle hook :
+
+```javascript
+ngOnChanges(changes: {[property: string]: SimpleChange }) { ...
+```
+
+This method use the SimpleChange Class to track changes on a directive's property .
+
+Main properties and method of such SimpleChange class :
+
+| Name  | Description  |
+| ------------ | ------------ |
+| previousValue  | This property returns the previous value of the input property.  |
+| currentValue  | This property returns the current value of the input property.  |
+| isFirstChange()  | This method returns true if this is the call to the ngOnChanges method that occurs before the ngOnInit method. |
+
+Exemple :
+
+```javascript
+export class PaModel {
+	
+	@Input("selfNoteModel")
+	modelProperty: string;
+
+	@HostBinding("value")
+	fieldValue: string = "";
+
+	ngOnChanges(changes: { [property: string]: SimpleChange }) {
+		let change = changes["modelProperty"];
+		if (change.currentValue != this.fieldValue) {
+		this.fieldValue = changes["modelProperty"].currentValue || "";
+	}
+}
+```
+
+### Structural Directives :
+
+let's create a personnal If statement :
+
+```javascript
+import {
+	Directive, SimpleChange, ViewContainerRef, TemplateRef, Input
+} from "@angular/core";
+@Directive({
+	selector: "[psIf]"
+})
+export class PsStructureDirective {
+
+	constructor(private container: ViewContainerRef,
+			private template: TemplateRef<Object>) { }
+
+	@Input("psIf")
+	expressionResult: boolean;
+
+	ngOnChanges(changes: { [property: string]: SimpleChange }) {
+			let change = changes["expressionResult"];
+			if (!change.isFirstChange() && !change.currentValue) {
+				this.container.clear();
+			} else if (change.currentValue) {
+				this.container.createEmbeddedView(this.template);
+			}
+	}
+}
+```
+now the Template usage of the psIf directive :
+
+```html
+<ng-template [psIf]="variable > 5  ?  true : false">
+	<div id="mainDiv">
+	 content ....
+	</div>
+</ng-template>
+```
+when the Angular evalute the expression : **variable > 5  ?  true : false** then the result is assigned to psIf inpout-bounded property so the ngOnChanges method get triggred (cuz a property get changed whiches the psIf redudent but it is)
+
+the **if (!change.isFirstChange() && !change.currentValue) {** code is to check if it the first change or not (remember that the *ngOnChanges()* get called before *ngOnInit()* ) .
+
+Let's not forget the constructor :
+
+...
+constructor(private container: **ViewContainerRef**, private template: **TemplateRef**< Object >) {}
+...
+
+**ViewContainerRef Methods and Properties :**
+1. **element** :  This property returns an ElementRef object that represents the
+container element.
+
+2. **createEmbeddedView(template)** : This method uses a template to create a new view. See the text after.the table for details. This method also accepts optional arguments for context data.
+
+3.  **clear()** : This method removes all the views from the container.
+
+4. **length** : This property returns the number of views in the container.
+
+5. **get(index)** : This method returns the ViewRef object representing the view at the
+specified index.
+
+6. **indexOf(view)**: This method returns the index of the specified ViewRef object.
+7. **insert(view, index)** : This method inserts a view at the specified index.
+8. ** remove(Index)** : This method removes and destroys the view at the specified index.
+9.  **detach(index)** :  This method detaches the view from the specified index without
+destroying it so that it can be repositioned with the insert method.
+
+Better is for the better :  **Using the Concise Structural Directive Syntax** 
+
+instead of writing :
+```html
+<ng-template [psIf]="variable > 5  ?  true : false">
+	<div id="mainDiv">
+	 content ....
+	</div>
+</ng-template>
+```
+
+wee can write :
+
+```html
+
+	<div id="mainDiv" *psIf="variable > 5  ?  true : false">
+	 content ....
+	</div>
+
+```
+no use of [ ] nor ng-template just a *  (called an asterisk).
 
