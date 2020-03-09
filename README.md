@@ -592,5 +592,5 @@ OffsetExpr : Number  // contains5 value
 ```
 so angular use the following convention :  DireictiveSelector + Capitlized(Keyword) where keyword in that exemple keywords are :  from , limit and offset
 
-note that the let variable (in that exemple named **item** ) is bound to context object's $implicit property . 
-in that case the ViewContainerRef.createEmbeddedView() method expect both a template reference as first argument and an object that contains $implicit property and the already mentionned properties . (hypothes to demonstrat  later) .
+Note that the let variable (in that exemple named **item** ) is bound to context object's **$implicit** property . 
+in that case the **ViewContainerRef.createEmbeddedView()** method expect both a template reference as first argument and an object that contains $implicit property and the already mentionned properties (from, limit offset) . (hypothes to demonstrat  later) .
