@@ -507,3 +507,90 @@ wee can write :
 ```
 no use of [ ] nor ng-template just a *  (called an asterisk).
 
+###### Iterating Structural Directives :
+
+let's creat a personnel For loop directive :
+
+```javascript
+import { Directive, ViewContainerRef, TemplateRef,
+Input, SimpleChange } from "@angular/core";
+@Directive({
+selector: "[psForOf]"
+})
+export class PsIteratorDirective {
+
+	constructor(private container: ViewContainerRef,
+	private template: TemplateRef<Object>) {}
+
+	@Input("psForOf")
+	dataSource: any;
+
+	ngOnInit() {
+		this.container.clear();
+		for (let i = 0; i < this.dataSource.length; i++) {
+			this.container.createEmbeddedView(this.template,
+					new PaIteratorContext(this.dataSource[i], i, this.dataSource.length));
+		}
+	}
+}
+class PsIteratorContext {
+
+	odd: boolean; even: boolean;
+	first: boolean; last: boolean;
+
+	constructor(public $implicit: any, public index: number, total: number ) {
+			this.odd = index % 2 == 1;
+			this.even = !this.odd;
+			this.first = index == 0;
+			this.last = index == total - 1;
+	}
+}
+```
+Note that the **xxOf** is mandatory for concise syntax  ( it becoms ***xx** instead of **[xxOf]**) .
+
+template without concise syntax :
+```html
+<ng-template [psForOf]="arrayOfObjects" let-item let-i="index" let-odd="odd" let-even="even">
+	<tr [class.bg-info]="odd" [class.bg-warning]="even">
+		<td>{{i + 1}}</td>
+		<td>{{item.name}}</td>
+		<td>{{item.category}}</td>
+		<td>{{item.price}}</td>
+	</tr>
+</ng-template>
+```
+concise Syntax :
+
+```html
+<tr  *psFor="let item of getProducts(); let i = index; let odd = odd;
+let even = even" [class.bg-info]="odd" [class.bg-warning]="even">
+		<td>{{i + 1}}</td>
+		<td>{{item.name}}</td>
+		<td>{{item.category}}</td>
+		<td>{{item.price}}</td>
+</tr>
+```
+
+going crazy with Convention naming using an expressive DSL :
+
+```html
+<div *psFor="let item from IteriableSource limit 10 offset 5">
+  content
+</div>
+```
+Angular is going to bind those values to @Input bounded properties such as :
+
+```javascript
+@Input("psForFrom") 
+fromExpr : Array  // contains IteriableSource value
+
+@Input("psForLimit") 
+limitExpr : Number  // contains 10 value
+
+@Input("psForOffset") 
+OffsetExpr : Number  // contains5 value
+```
+so angular use the following convention :  DireictiveSelector + Capitlized(Keyword) where keyword in that exemple keywords are :  from , limit and offset
+
+note that the let variable (in that exemple named **item** ) is bound to context object's $implicit property . 
+in that case the ViewContainerRef.createEmbeddedView() method expect both a template reference as first argument and an object that contains $implicit property and the already mentionned properties . (hypothes to demonstrat  later) .
