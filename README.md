@@ -811,3 +811,24 @@ Pipe , Directives and Component all can declare dependencies on a service .
 a Service Class is decorated with @Injectable() decorator to relay on angular DI System.
 
 Registring a Service at Module level :  put Service Class in the providers array of the Module decorator.
+
+### The Angular Providers
+
+1. **Class provider** : This provider is configured using a class. Dependencies on the service are resolved by an instance of the class, which Angular creates.
+
+2. **Value provider** : This provider is configured using an object, which is used to resolve dependencies on the service.
+
+3. **Factory provider** : This provider is configured using a function. Dependencies on the service are resolved using an object that is created by invoking the function.
+
+4. **Existing service provider** : This provider is configured using the name of another service and allows aliases for services to be created.
+
+##### Usage :
+
+###### Class Provider :
+
+```
+{
+provide: LogService,
+useClass: LogService
+}
+```
