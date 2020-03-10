@@ -594,3 +594,174 @@ so angular use the following convention :  DireictiveSelector + Capitlized(Keywo
 
 Note that the let variable (in that exemple named **item** ) is bound to context object's **$implicit** property . 
 in that case the **ViewContainerRef.createEmbeddedView()** method expect both a template reference as first argument and an object that contains $implicit property and the already mentionned properties (from, limit offset) . (hypothes to demonstrat  later) .
+
+#### Dealing with Collection-Level Data Changes :
+**Problem :**
+  each element of a collection's property change is reflected by angular's change detection process. not the same for collection level change (remove, replace, add element ...) are not auto handled by angular.
+
+**Solution :** 
+
+
+```javascript
+ngDoCheck() {
+	console.log("ngDoCheck Called");
+	this.updateContent();
+}
+private updateContent() {
+	this.container.clear();
+	for (let i = 0; i < this.dataSource.length; i++) {
+	this.container.createEmbeddedView(this.template,
+	new PaIteratorContext(this.dataSource[i],
+	i, this.dataSource.length));
+	}
+}
+```
+The problem with the ngDoCheck method is that it is invoked every time Angular detects a change anywhere in the application (exemple : focus, click, input change ...etc)  that's a true performance bottleneck.
+
+**Better Solution :**
+Angular provides some tools for managing updates more efficiently and updating content only when it is required.
+
+**import :**
+```javascript
+import { .....,
+	 IterableDiffer, IterableDiffers, ChangeDetectorRef, 
+	 CollectionChangeRecord, DefaultIterableDiffer
+} from "@angular/core";
+```
+
+**in the Directive class :**
+```javascript
+private differ: DefaultIterableDiffer<any>;
+  //.....
+constructor(....
+private differs: IterableDiffers,
+private changeDetector: ChangeDetectorRef){
+
+}
+//....
+ngOnInit() {
+this.differ =
+<DefaultIterableDiffer<any>> this.differs.find(this.dataSource).create();
+}
+
+ngDoCheck() {
+	let changes = this.differ.diff(this.dataSource);
+	if (changes != null) {
+		console.log("ngDoCheck called, changes detected");
+		changes.forEachAddedItem(addition => {
+			this.container.createEmbeddedView(this.template,
+			new PaIteratorContext(addition.item, addition.currentIndex, changes.length));
+		});
+	}
+}
+```
+
+##### Directive and Querying the Host Element Content :
+decorator :
+
+```
+@ContentChild(Class| String, option? )
+child :ClassOfTheChild;
+```
+1. first argument is : 
+the **class** of child directive of the element or a **string represention of a template variable**. 
+
+2. second argument :
+option (**object { descendants: true }** f you want to include the descendants of children in the results) .
+
+Note :the  @ContentChild decorator match onley the first child . to get all childeren we can use :
+```
+@ContentChildren(ClassOFChildern)
+contentChildren: QueryList<ClassOFChildern>;  // QueryList defined in @angular/core
+```
+Main properties and methods of QueryList class :
+**properties** : length, first, last , changes.
+**methods**: reduce(function), map(function), filter(function), some(function) and forEach(function) .
+
+###### Recieveing Query Change Notification :
+
+```
+ngAfterContentInit() {
+	this.contentChildren.changes.subscribe(() => {
+	setTimeout(() => this.updateContentChildren(this.modelProperty), 0);
+	});
+}
+private updateContentChildren(dark: Boolean) {
+	if (this.contentChildren != null && dark != undefined) {
+		this.contentChildren.forEach((child, index) => {
+			child.setColor(index % 2 ? dark : !dark);
+		});
+	}
+}
+```
+so **changes** is an observable object that used to subscribe to it using an observer .
+
+Ok we Deal with Directives so It's time to rock with  Components
+
+### Components :
+Component = Directives + HTML content [ + CSS style ]
+
+###### The Component Decorator Properties :
+
+1. **animations** : This property is used to configuration animations.
+2. **encapsulation** : This property is used to change the view encapsulation settings, which control how component styles are isolated from the rest of the HTML document.
+3.  **selector ** :  This property is used to specify the CSS selector used to match host elements.
+3. **providers** : This property is used to create local providers for services.
+4. **viewProviders** : This property is used to create local providers for services that are available only to view children.
+5. classic properties : **templateUrl**, **template**, **styleUrls** and **style**.
+
+###### Data Flow in components :
+
+1. parent to child component : property data-bound (use properties decorated with @Input decorator , the [ property ] = "expr" syntax) .
+
+2. Child to parent component :  event data-bound (use properties decorated by @Output decorator, the (event) = " expr", expr = mehtod($event) in most cases  syntax).
+
+###### Projecting Host Element Content :
+** Hello future-me this is the best part .**
+###### ng-content :
+
+template of a component (selector : exemple-component)
+```html
+<div>
+ .....
+  <ng-content></ng-content>
+.....
+</div>
+```
+when using this template the ng-content is replaced by the content inside the host element of the exempleComponent
+```html
+<exemple-component>
+		<div>
+		 custom content to replace ng-content
+		</div>
+</exemple-component>
+
+```
+###### Querying Template Content :
+
+```
+@ViewChildren(ClassOfDirectiveOrComponent)
+viewChildren: QueryList<ClassOfDirectiveOrComponent>;
+```
+
+associated lifecycle hook :
+
+```
+ ngAfterViewInit() {
+	this.viewChildren.changes.subscribe(() => {
+			this.updateViewChildren();
+	});
+	this.updateViewChildren();
+}
+
+private updateViewChildren() { ... }
+```
+
+see also : @ViewChild(class) , ngAfterViewChecked
+
+
+You may need to combine view child and content child queries if you have used the ng-content element. The content defined in the template is queried , but the
+project content—which replaces the ng-content element—is queried using the child queries
+
+
+### Using and Creating pipes :
