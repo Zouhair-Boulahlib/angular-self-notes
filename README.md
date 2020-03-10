@@ -765,3 +765,49 @@ project content—which replaces the ng-content element—is queried using the c
 
 
 ### Using and Creating pipes :
+##### Creating a Custom Pipe :
+
+```
+import { Pipe } from "@angular/core";
+@Pipe({
+name: "addTax"
+})
+export class Riba {
+	defaultRate: number = 10;
+	transform(value: any, rate?: any): number {
+		let valueNumber = Number.parseFloat(value);
+		let rateNumber = rate == undefined ?
+		this.defaultRate : Number.parseInt(rate);
+		return valueNumber + (valueNumber * (rateNumber / 100));
+	}
+}
+```
+Pipes are classes to which the **@Pipe decorator** has been applied and that implement a **method called transform**.
+
+**Pipe Decorator properties :**
+1. **name** : This property specifies the name by which the pipe is applied in templates.
+
+2. **pure** : When true, this pipe is reevaluated only when its input value or its arguments are changed. This is the default value.
+
+* usage :*
+```
+{{item.price | addTax:(taxRate || 0) }}
+```
+arguements are separated  with the ":" while target datasource and pipe are seperated with "|".
+exemple :
+```
+{{item.price | addTax:(taxRate || 0) | currency:"USD":"symbol" }}
+```
+### Services and DI :
+
+declaring dependency on a Service using constructor :
+
+```
+constructor(private service: AClassService) { }
+
+```
+Pipe , Directives and Component all can declare dependencies on a service .
+
+a Service Class is decorated with @Injectable() decorator to relay on angular DI System.
+
+Registring a Service at Module level :  put Service Class in the providers array of the Module decorator.
